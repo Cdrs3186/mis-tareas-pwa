@@ -3,70 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bienvenido - Tareas Azul</title>
+    <title>Inicio - Mis Tareas (Prueba)</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#b2ebf2">
     <style>
-        :root {
-            --bg-color: #e0f7fa;
-            --container-bg: #ffffff;
-            --primary: #4dd0e1;
-            --primary-hover: #26c6da;
-            --text-color: #006064;
-        }
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            text-align: center;
-        }
-        .intro-container {
-            background-color: var(--container-bg);
-            padding: 40px;
-            border-radius: 15px;
-            box-shadow: 0 6px 15px rgba(0, 96, 100, 0.1);
-            max-width: 400px;
-        }
-        h1 { color: var(--primary-hover); }
-        p { margin-bottom: 30px; font-size: 1.1em; color: #00838f; }
-        .btn-entrar {
-            display: inline-block;
-            padding: 12px 30px;
-            background-color: var(--primary);
-            color: white;
-            text-decoration: none;
-            border-radius: 8px;
-            font-size: 18px;
-            font-weight: bold;
-            transition: background-color 0.3s;
-        }
-        .btn-entrar:hover { background-color: var(--primary-hover); }
+        body { font-family: 'Segoe UI', sans-serif; background-color: #e0f7fa; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .login-box { background: white; padding: 40px; border-radius: 10px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 80%; max-width: 300px; }
+        h1 { color: #00838f; margin-top: 0; }
+        p { color: #555; margin-bottom: 20px; }
+        button { background: #00838f; color: white; border: none; padding: 12px 20px; border-radius: 5px; cursor: pointer; font-size: 16px; width: 100%; font-weight: bold; }
+        button:hover { background: #006064; }
     </style>
 </head>
 <body>
-    <div class="intro-container">
-        <h1>Tareas Azul</h1>
-        <p>Organiza tu día de forma sencilla y sin complicaciones. Tu productividad en tonos relajantes.</p>
-        <a href="federacion.php" class="btn-entrar">Entrar</a>
+
+    <div class="login-box">
+        <h1>Mis Tareas</h1>
+        <p>Versión PWA de prueba (Sin conexión al servidor)</p>
+        <button onclick="entrarDePrueba()">Entrar a la App</button>
     </div>
 
     <script>
-        // Si ya hay una sesión activa, saltar directo a la app
-        if (localStorage.getItem('sesion_activa') === 'true') {
+        function entrarDePrueba() {
+            // Engañamos a app.html diciéndole que la sesión sí está activa
+            localStorage.setItem('sesion_activa', 'true');
+            localStorage.setItem('numero_cuenta_actual', 'Usuario Prueba');
+            
+            // Lo mandamos a la aplicación
             window.location.href = 'app.html';
         }
 
-        // Registrar SW
+        // También registramos el Service Worker aquí por si la instalan desde esta pantalla
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js');
+                navigator.serviceWorker.register('sw.js');
             });
         }
     </script>
+
 </body>
 </html>
