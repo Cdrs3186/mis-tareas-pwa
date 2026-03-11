@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Tareas</title>
+    <link rel="icon" href="./favicon.ico" type="image/x-icon">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#b2ebf2">
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background-color: #e0f7fa; display: flex; justify-content: center; padding: 20px; margin: 0; }
+        .contenedor { background: white; padding: 20px; border-radius: 10px; width: 100%; max-width: 400px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        h1 { color: #00838f; text-align: center; margin-top: 0; }
+        .input-grupo { display: flex; gap: 10px; margin-bottom: 20px; }
+        input { flex: 1; padding: 10px; border: 1px solid #b2ebf2; border-radius: 5px; outline: none; }
+        button.agregar { background: #4dd0e1; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        button.agregar:hover { background: #26c6da; }
+        ul { list-style: none; padding: 0; margin: 0; }
+        li { background: #f1fbfc; margin-bottom: 10px; padding: 10px 15px; border-radius: 5px; display: flex; justify-content: space-between; align-items: center; color: #006064; }
+        button.borrar { background: #ef9a9a; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; }
+        button.borrar:hover { background: #e57373; }
+        .header-app { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        button.salir { background: none; border: none; color: #d32f2f; text-decoration: underline; cursor: pointer; padding: 0; }
+        .cuenta-badge { background: #e0f7fa; color: #00838f; padding: 5px 10px; border-radius: 15px; font-size: 0.8em; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="contenedor">
+        <div class="header-app">
+            <span class="cuenta-badge" id="displayCuenta">Cargando...</span>
+            <button class="salir" onclick="cerrarSesion()">Cerrar sesión</button>
+        </div>
+        <h1>Mis Tareas</h1>
+        <div class="input-grupo">
+            <input type="text" id="tareaInput" placeholder="Escribe una tarea...">
+            <button class="agregar" onclick="agregarTarea()">Añadir</button>
+        </div>
+        <ul id="listaTareas"></ul>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+
+        if (urlParams.get('status') === 'success') {
+            localStorage.setItem('sesion_activa', 'true');
+            const cuentaAtrapada = urlParams.get('cuenta');
+            if (cuentaAtrapada) localStorage.setItem('numero_cuenta_actual', cuentaAtrapada);
+            window.history.replaceState({}, document.title, "app.html");
+        }
+
+        if (localStorage.getItem('sesion_activa') !== 'true') {
+            window.location.href = 'index.html';
+        }
+
+        const miNumeroCuenta = localStorage.getItem('numero_cuenta_actual') || 'Desconocida';
+        document.getElementById('displayCuenta').innerText = 'Cuenta: ' + miNumeroCuenta;
+
+        function cerrarSesion() {
+            localStorage.removeItem('sesion_activa');
+            localStorage.removeItem('numero_cuenta_actual');
+            window.location.href = 'logout.php'; // Te manda a cerrar sesión de la escuela
+        }
+
+        function cargarTareas() {
+            const tareas = JSON.parse(localStorage.getItem('mis_tareas')) || [];
+            const lista = document.getElementById('listaTareas');
+            lista.innerHTML = '';
+            tareas.forEach((t, i) => {
+                lista.innerHTML += `<li>${t} <button class="borrar" onclick="borrarTarea(${i}, '${t}')">Borrar</button></li>`;
+            });
+        }
+
+        function agregarTarea() {
+            const input = document.getElementById('tareaInput');
+            const texto = input.value.trim();
+            if(texto === '') return;
+
+            const tareas = JSON.parse(localStorage.getItem('mis_tareas')) || [];
+            tareas.push(texto);
+            localStorage.setItem('mis_tareas', JSON.stringify(tareas));
+            
+            input.value = '';
+            cargarTareas();
+            sincronizarConBD('agregar', texto);
+        }
+
+        function borrarTarea(index, textoTarea) {
+            const tareas = JSON.parse(localStorage.getItem('mis_tareas')) || [];
+            tareas.splice(index, 1);
+            localStorage.setItem('mis_tareas', JSON.stringify(tareas));
+            cargarTareas();
+            sincronizarConBD('borrar', textoTarea);
+        }
+
+        function sincronizarConBD(accion, tareaTexto) {
+            if (!navigator.onLine) return; // Si no hay internet, no intenta contactar a la BD
+
+            fetch('api_tareas.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    accion: accion,
+                    tarea: tareaTexto,
+                    numero_cuenta: miNumeroCuenta
+                })
+            }).catch(error => console.error("Error BD:", error));
+        }
+
+        cargarTareas();
+
+        // --- EL CEREBRO OFFLINE: REGISTRO DEL SERVICE WORKER ---
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(registro => {
+                        console.log('¡Service Worker registrado con éxito!', registro.scope);
+                    })
+                    .catch(error => {
+                        console.error('Error al registrar el Service Worker:', error);
+                    });
+            });
+        }
+    </script>
+</body>
+</html>

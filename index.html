@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bienvenido - Tareas Azul</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#b2ebf2">
+    <style>
+        :root {
+            --bg-color: #e0f7fa;
+            --container-bg: #ffffff;
+            --primary: #4dd0e1;
+            --primary-hover: #26c6da;
+            --text-color: #006064;
+        }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            text-align: center;
+        }
+        .intro-container {
+            background-color: var(--container-bg);
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 6px 15px rgba(0, 96, 100, 0.1);
+            max-width: 400px;
+        }
+        h1 { color: var(--primary-hover); }
+        p { margin-bottom: 30px; font-size: 1.1em; color: #00838f; }
+        .btn-entrar {
+            display: inline-block;
+            padding: 12px 30px;
+            background-color: var(--primary);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        .btn-entrar:hover { background-color: var(--primary-hover); }
+    </style>
+</head>
+<body>
+    <div class="intro-container">
+        <h1>Tareas Azul</h1>
+        <p>Organiza tu día de forma sencilla y sin complicaciones. Tu productividad en tonos relajantes.</p>
+        <a href="federacion.php" class="btn-entrar">Entrar</a>
+    </div>
+
+    <script>
+        // Si ya hay una sesión activa, saltar directo a la app
+        if (localStorage.getItem('sesion_activa') === 'true') {
+            window.location.href = 'app.html';
+        }
+
+        // Registrar SW
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js');
+            });
+        }
+    </script>
+</body>
+</html>
